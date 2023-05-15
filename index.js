@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
@@ -21,13 +22,56 @@ const client = new MongoClient(uri, {
   },
 });
 
+//--------------------------
+const verifyJWT = (req, res, next) => {
+  // console.log("hitting verify jwt");
+  // console.log(req.headers.authorization);
+  const authorization = req.headers.authorization;
+  console.log(authorization);
+
+  if (!authorization) {
+    return res
+      .status(401)
+      .send({ error: true, massage: "unauthorized access" });
+  }
+
+  const token = authorization.split(" ")[1];
+  console.log(token);
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (error, decoded) => {
+    if (error) {
+      return res
+        .status(401)
+        .send({ error: true, massage: "unauthorized access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     //!----------------------------------------
 
-    //! services
+    // ! jwt server
+    // create data from client site to server site
+    app.post("/jwt", (req, res) => {
+      const user = req.body;
+
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "5h",
+      });
+
+      res.send({ token });
+
+      console.log(user);
+    });
+
+    //--------------------------------------------------------------------------
+
+    //! services server
     // step 0: declared (servicesCollection) in mongodb database
     const servicesCollection = client
       .db("car-doctor-database")
@@ -53,7 +97,7 @@ async function run() {
       res.send(result);
     });
     //------------------------------------------------------------------
-    // data send to  "/services" > from "/bookings"
+    // ==> data send  "/services" ==> to "/bookings ==>"
 
     //! bookings
     // step 0: declared (bookingCollection) in mongodb database
@@ -70,9 +114,13 @@ async function run() {
       res.send(result);
     });
 
+    //// crated booking data convert to read method (post => find)
+
     // [(read) (find some data) form "/bookings"] => get => req.query
-    app.get("/bookings", async (req, res) => {
-      console.log(req.query.email);
+    app.get("/bookings", verifyJWT, async (req, res) => {
+      console.log(req.headers.authorization);
+
+      // find some data only email related data form /"bookings"
       let query = {};
       if (req.query?.email) {
         query = {
