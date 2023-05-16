@@ -56,7 +56,7 @@ async function run() {
     //!----------------------------------------
 
     // ! jwt server
-    // create data from client site to server site
+    // [ (create) user data from client site to server site "/jwt" ]
     app.post("/jwt", (req, res) => {
       const user = req.body;
 
@@ -97,15 +97,17 @@ async function run() {
       res.send(result);
     });
     //------------------------------------------------------------------
-    // ==> data send  "/services" ==> to "/bookings ==>"
 
-    //! bookings
+    //todo  ==> make another server "/bookings" ==> from  "/services" ==>
+
+    //! bookings server
     // step 0: declared (bookingCollection) in mongodb database
     const bookingCollection = client
       .db("car-doctor-database")
       .collection("bookings");
 
-    // [(create) "/bookings" data from (client site to server site) and inset in mongodb] => post => insert a document
+    //* [(create) "/bookings" data from (client site to server site) and inset in mongodb] => post => insert a document
+
     app.post("/bookings", async (req, res) => {
       // In client site (body) hold data & in server site use (req.body) to get data from client site
       const booking = req.body;
@@ -114,12 +116,17 @@ async function run() {
       res.send(result);
     });
 
-    //// crated booking data convert to read method (post => find)
+    // crated booking data convert to read method (post => find)
 
-    // [(read) (find some data) form "/bookings"] => get => req.query
+    //* [(read) (find some data) form "/bookings"] => get => req.query
+
     app.get("/bookings", verifyJWT, async (req, res) => {
       console.log(req.headers.authorization);
 
+      const decoded = req.decoded;
+      if (decoded.email !== req.query.email) {
+        return res.status(403).send({ error: 1, massage: "invalid user" });
+      }
       // find some data only email related data form /"bookings"
       let query = {};
       if (req.query?.email) {
@@ -132,7 +139,8 @@ async function run() {
       res.send(result);
     });
 
-    //[ (update) one data 'dynamically' form client site to server site "/bookings"] => put/patch => update a document
+    // * [ (update) one data 'dynamically' form client site to server site "/bookings"] => put/patch => update a document
+
     app.patch("/bookings/:id", async (req, res) => {
       const updatedBooking = req.body;
       console.log(updatedBooking);
