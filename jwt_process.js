@@ -4,7 +4,11 @@
 
 why we use json web token (jwt)=>
 
-Authentication: JWT provide a secure method for user authentication. When a user logs in, the server generates a JWT containing the user's identity and any relevant information. This token is then sent back to the client, usually stored in local storage or a cookie. On subsequent requests, the client includes the JWT in the Authorization header, allowing the server to authenticate the user based on the token's integrity and validity.
+Authentication: JWT provide a secure method for user authentication. When a user logs in, the server generates a JWT containing the user's identity and any relevant information. This token is then sent back to the client, usually stored in local storage or a cookie.
+
+On subsequent requests, the client includes the JWT in the Authorization header, allowing the server to authenticate the user based on the token's integrity and validity.
+
+
 
 first process:
 ! get jwt token from server site when a user logged from client site
@@ -40,7 +44,7 @@ remove this token from local storage
 second step:
 ! when will we  verify the jwt token ?
 
-* verify jwt token => when user  will go (NewBookings route) only access to his personal booking related data  :
+* verify jwt token => when user  will go to (NewBookings route) only access to his personal booking related data  :
 
 
  * [(res.send) => find some bookings data only user.email related from server site       ("/booking") / send jwt token form local storage => to server site ("/booking") /  process => jwt.verify(token) in  server "/bookings" ]

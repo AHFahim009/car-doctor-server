@@ -77,7 +77,7 @@ async function run() {
       .db("car-doctor-database")
       .collection("services");
 
-    // [(read) (all data) from  servicesCollections ] => get => find multiple operation
+    // [(read) (all data) from  servicesCollections  / read server "/services"] => get => find multiple operation
     app.get("/services", async (req, res) => {
       const cursor = servicesCollection.find();
       const result = await cursor.toArray();
@@ -106,7 +106,7 @@ async function run() {
       .db("car-doctor-database")
       .collection("bookings");
 
-    //* [(create) "/bookings" data from (client site to server site) and inset in mongodb] => post => insert a document
+    //* [(create) "/bookings" server from  (client site => server site =>) and insert in mongodb] => post => insert a document
 
     app.post("/bookings", async (req, res) => {
       // In client site (body) hold data & in server site use (req.body) to get data from client site
